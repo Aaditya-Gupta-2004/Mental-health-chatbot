@@ -1,4 +1,3 @@
-<script>
 const form = document.getElementById('chat-form');
 const input = document.getElementById('msg-input');
 const messages = document.getElementById('messages');
@@ -23,4 +22,4 @@ function addMessage(sender, text) {
   messages.appendChild(msg);
   messages.scrollTop = messages.scrollHeight;
 }
-</script>
+
