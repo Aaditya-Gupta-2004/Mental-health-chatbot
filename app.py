@@ -1,66 +1,16 @@
 import nltk
-
 nltk.download('popular')
-nltk.download('punkt_tab')
 from nltk.stem import WordNetLemmatizer
 
 lemmatizer = WordNetLemmatizer()
 import pickle
 import numpy as np
 from keras.models import load_model
-
-model = load_model('model.h5')
 import json
 import random
 
-from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
-import spacy
-from spacy.language import Language
-from spacy_langdetect import LanguageDetector
 
-# translator pipeline for english to swahili translations
-
-eng_swa_tokenizer = AutoTokenizer.from_pretrained("Rogendo/en-sw")
-eng_swa_model = AutoModelForSeq2SeqLM.from_pretrained("Rogendo/en-sw")
-
-eng_swa_translator = pipeline(
-    "text2text-generation",
-    model=eng_swa_model,
-    tokenizer=eng_swa_tokenizer,
-)
-
-
-def translate_text_eng_swa(text):
-    translated_text = eng_swa_translator(text, max_length=128, num_beams=5)[0]['generated_text']
-    return translated_text
-
-
-# translator pipeline for swahili to english translations
-
-swa_eng_tokenizer = AutoTokenizer.from_pretrained("Rogendo/sw-en")
-swa_eng_model = AutoModelForSeq2SeqLM.from_pretrained("Rogendo/sw-en")
-
-swa_eng_translator = pipeline(
-    "text2text-generation",
-    model=swa_eng_model,
-    tokenizer=swa_eng_tokenizer,
-)
-
-
-def translate_text_swa_eng(text):
-    translated_text = swa_eng_translator(text, max_length=128, num_beams=5)[0]['generated_text']
-    return translated_text
-
-
-def get_lang_detector(nlp, name):
-    return LanguageDetector()
-
-
-nlp = spacy.load("en_core_web_sm")
-
-Language.factory("language_detector", func=get_lang_detector)
-
-nlp.add_pipe('language_detector', last=True)
+model = load_model('model.h5')
 
 intents = json.loads(open('intents.json').read())
 words = pickle.load(open('texts.pkl', 'rb'))
@@ -82,7 +32,7 @@ def bow(sentence, words, show_details=True):
                 bag[i] = 1
                 if show_details:
                     print("found in bag: %s" % w)
-    return (np.array(bag))
+    return np.array(bag)
 
 
 def predict_class(sentence, model):
@@ -111,23 +61,10 @@ def getResponse(ints, intents_json):
 
 
 def chatbot_response(msg):
-    doc = nlp(msg)
-    detected_language = doc._.language['language']
-    print(f"Detected language chatbot_response:- {detected_language}")
-
-    chatbotResponse = "Loading bot response..........."
-
-    if detected_language == "en":
-        res = getResponse(predict_class(msg, model), intents)
-        chatbotResponse = res
-        print("en_sw chatbot_response:- ", res)
-    elif detected_language == 'sw':
-        translated_msg = translate_text_swa_eng(msg)
-        res = getResponse(predict_class(translated_msg, model), intents)
-        chatbotResponse = translate_text_eng_swa(res)
-        print("sw_en chatbot_response:- ", chatbotResponse)
-
-    return chatbotResponse
+    print("chatbot_response input:", msg)
+    res = getResponse(predict_class(msg, model), intents)
+    print("chatbot_response output:", res)
+    return res
 
 
 from flask import Flask, render_template, request
@@ -144,27 +81,9 @@ def home():
 @app.route("/get")
 def get_bot_response():
     userText = request.args.get('msg')
-    print("get_bot_response:- " + userText)
+    print("get_bot_response: " + userText)
 
-    doc = nlp(userText)
-    detected_language = doc._.language['language']
-    print(f"Detected language get_bot_response:- {detected_language}")
-
-    bot_response_translate = "Loading bot response..........."
-
-    if detected_language == "en":
-        bot_response_translate = userText
-        print("en_sw get_bot_response:-", bot_response_translate)
-
-    elif detected_language == 'sw':
-        bot_response_translate = translate_text_swa_eng(userText)
-        print("sw_en get_bot_response:-", bot_response_translate)
-
-    chatbot_response_text = chatbot_response(bot_response_translate)
-
-    if detected_language == 'sw':
-        chatbot_response_text = translate_text_eng_swa(chatbot_response_text)
-
+    chatbot_response_text = chatbot_response(userText)
     return chatbot_response_text
 
 
