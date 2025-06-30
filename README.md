@@ -19,13 +19,4 @@ A web-based chatbot designed to provide basic mental health support using Natura
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/mental-health-chatbot.git
-cd mental-health-chatbot
-python -m venv venv
-# Activate it
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-pip install -r requirements.txt
-python app.py
+git clone https://github.com/Aaditya-Gupta-2004/mental-health-chatbot.git
