@@ -25,12 +25,12 @@ git clone https://github.com/Aaditya-Gupta-2004/mental-health-chatbot.git
 ```
 python -m venv venv
 ```
-# Activate it
-# Windows:
+### Activate it
+### Windows:
 ```
 venv\Scripts\activate
 ```
-# macOS/Linux:
+### macOS/Linux:
 ```
 source venv/bin/activate
 ```
